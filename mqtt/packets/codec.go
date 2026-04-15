@@ -155,6 +155,11 @@ func DecodeLength(b io.ByteReader) (n, bu int, err error) {
 			return 0, bu, err
 		}
 
+		// Check before shift to prevent overflow: max 4 bytes allowed (multiplier max = 21)
+		if multiplier >= 28 {
+			return 0, bu, ErrMalformedVariableByteInteger
+		}
+
 		value |= uint32(eb&127) << multiplier
 		if value > 268435455 {
 			return 0, bu, ErrMalformedVariableByteInteger
